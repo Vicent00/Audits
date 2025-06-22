@@ -1,0 +1,375 @@
+slither . --config-file slither.config.json --checklist 
+'forge clean' running (wd: /workspaces/web3-dev-containers/foundry/mounted/projects/4-puppy-raffle-audit)
+'forge config --json' running
+'forge build --build-info --skip */test/** */script/** --force' running (wd: /workspaces/web3-dev-containers/foundry/mounted/projects/4-puppy-raffle-audit)
+INFO:Detectors:
+PuppyRaffle.withdrawFees() (src/PuppyRaffle.sol#173-179) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = feeAddress.call{value: feesToWithdraw}() (src/PuppyRaffle.sol#177)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+INFO:Detectors:
+PuppyRaffle.selectWinner() (src/PuppyRaffle.sol#134-168) uses a weak PRNG: "winnerIndex = uint256(keccak256(bytes)(abi.encodePacked(msg.sender,block.timestamp,block.difficulty))) % players.length (src/PuppyRaffle.sol#137-139)" 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#weak-PRNG
+INFO:Detectors:
+PuppyRaffle.withdrawFees() (src/PuppyRaffle.sol#173-179) uses a dangerous strict equality:
+	- require(bool,string)(address(this).balance == uint256(totalFees),PuppyRaffle: There are currently players active!) (src/PuppyRaffle.sol#174)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Reentrancy in PuppyRaffle.refund(uint256) (src/PuppyRaffle.sol#102-111):
+	External calls:
+	- address(msg.sender).sendValue(entranceFee) (src/PuppyRaffle.sol#107)
+	State variables written after the call(s):
+	- players[playerIndex] = address(0) (src/PuppyRaffle.sol#109)
+	PuppyRaffle.players (src/PuppyRaffle.sol#27) can be used in cross function reentrancies:
+	- PuppyRaffle.enterRaffle(address[]) (src/PuppyRaffle.sol#83-98)
+	- PuppyRaffle.getActivePlayerIndex(address) (src/PuppyRaffle.sol#116-126)
+	- PuppyRaffle.players (src/PuppyRaffle.sol#27)
+	- PuppyRaffle.refund(uint256) (src/PuppyRaffle.sol#102-111)
+	- PuppyRaffle.selectWinner() (src/PuppyRaffle.sol#134-168)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-1
+INFO:Detectors:
+PuppyRaffle.constructor(uint256,address,uint256)._feeAddress (src/PuppyRaffle.sol#64) lacks a zero-check on :
+		- feeAddress = _feeAddress (src/PuppyRaffle.sol#66)
+PuppyRaffle.changeFeeAddress(address).newFeeAddress (src/PuppyRaffle.sol#185) lacks a zero-check on :
+		- feeAddress = newFeeAddress (src/PuppyRaffle.sol#186)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+INFO:Detectors:
+Reentrancy in PuppyRaffle.refund(uint256) (src/PuppyRaffle.sol#102-111):
+	External calls:
+	- address(msg.sender).sendValue(entranceFee) (src/PuppyRaffle.sol#107)
+	Event emitted after the call(s):
+	- RaffleRefunded(playerAddress) (src/PuppyRaffle.sol#110)
+Reentrancy in PuppyRaffle.selectWinner() (src/PuppyRaffle.sol#134-168):
+	External calls:
+	- (success,None) = winner.call{value: prizePool}() (src/PuppyRaffle.sol#165)
+	- _safeMint(winner,tokenId) (src/PuppyRaffle.sol#167)
+		- returndata = to.functionCall(abi.encodeWithSelector(IERC721Receiver(to).onERC721Received.selector,_msgSender(),from,tokenId,_data),ERC721: transfer to non ERC721Receiver implementer) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#441-447)
+		- (success,returndata) = target.call{value: value}(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#119)
+	External calls sending eth:
+	- (success,None) = winner.call{value: prizePool}() (src/PuppyRaffle.sol#165)
+	- _safeMint(winner,tokenId) (src/PuppyRaffle.sol#167)
+		- (success,returndata) = target.call{value: value}(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#119)
+	Event emitted after the call(s):
+	- Transfer(address(0),to,tokenId) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#343)
+		- _safeMint(winner,tokenId) (src/PuppyRaffle.sol#167)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+PuppyRaffle.selectWinner() (src/PuppyRaffle.sol#134-168) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= raffleStartTime + raffleDuration,PuppyRaffle: Raffle not over) (src/PuppyRaffle.sol#135)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+4 different versions of Solidity are used:
+	- Version constraint >=0.6.0 is used by:
+		->=0.6.0 (lib/base64/base64.sol#3)
+	- Version constraint >=0.6.0<0.8.0 is used by:
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/access/Ownable.sol#3)
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/introspection/ERC165.sol#3)
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/introspection/IERC165.sol#3)
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/math/SafeMath.sol#3)
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#3)
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol#3)
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/utils/Context.sol#3)
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/utils/EnumerableMap.sol#3)
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/utils/EnumerableSet.sol#3)
+		->=0.6.0<0.8.0 (lib/openzeppelin-contracts/contracts/utils/Strings.sol#3)
+	- Version constraint >=0.6.2<0.8.0 is used by:
+		->=0.6.2<0.8.0 (lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol#3)
+		->=0.6.2<0.8.0 (lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Enumerable.sol#3)
+		->=0.6.2<0.8.0 (lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Metadata.sol#3)
+		->=0.6.2<0.8.0 (lib/openzeppelin-contracts/contracts/utils/Address.sol#3)
+	- Version constraint ^0.7.6 is used by:
+		-^0.7.6 (src/PuppyRaffle.sol#3)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+INFO:Detectors:
+PuppyRaffle._isActivePlayer() (src/PuppyRaffle.sol#191-199) is never used and should be removed
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dead-code
+INFO:Detectors:
+Version constraint ^0.7.6 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess
+	- AbiReencodingHeadOverflowWithStaticArrayCleanup
+	- DirtyBytesArrayToStorage
+	- DataLocationChangeInInternalOverride
+	- NestedCalldataArrayAbiReencodingSizeValidation
+	- SignedImmutables
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching.
+It is used by:
+	- ^0.7.6 (src/PuppyRaffle.sol#3)
+solc-0.7.6 is an outdated solc version. Use a more recent version (at least 0.8.0), if possible.
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+INFO:Detectors:
+Low level call in PuppyRaffle.selectWinner() (src/PuppyRaffle.sol#134-168):
+	- (success,None) = winner.call{value: prizePool}() (src/PuppyRaffle.sol#165)
+Low level call in PuppyRaffle.withdrawFees() (src/PuppyRaffle.sol#173-179):
+	- (success,None) = feeAddress.call{value: feesToWithdraw}() (src/PuppyRaffle.sol#177)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+Loop condition j < players.length (src/PuppyRaffle.sol#93) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < players.length (src/PuppyRaffle.sol#118) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < players.length (src/PuppyRaffle.sol#193) should use cached array length instead of referencing `length` member of the storage array.
+ Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#cache-array-length
+INFO:Detectors:
+PuppyRaffle.commonImageUri (src/PuppyRaffle.sol#42) should be constant 
+PuppyRaffle.legendaryImageUri (src/PuppyRaffle.sol#52) should be constant 
+PuppyRaffle.rareImageUri (src/PuppyRaffle.sol#47) should be constant 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-constant
+INFO:Detectors:
+PuppyRaffle.raffleDuration (src/PuppyRaffle.sol#28) should be immutable 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-immutable
+**THIS CHECKLIST IS NOT COMPLETE**. Use `--show-ignored-findings` to show all the results.
+Summary
+ - [arbitrary-send-eth](#arbitrary-send-eth) (1 results) (High)
+ - [weak-prng](#weak-prng) (1 results) (High)
+ - [incorrect-equality](#incorrect-equality) (1 results) (Medium)
+ - [reentrancy-no-eth](#reentrancy-no-eth) (1 results) (Medium)
+ - [missing-zero-check](#missing-zero-check) (2 results) (Low)
+ - [reentrancy-events](#reentrancy-events) (2 results) (Low)
+ - [timestamp](#timestamp) (1 results) (Low)
+ - [pragma](#pragma) (1 results) (Informational)
+ - [dead-code](#dead-code) (1 results) (Informational)
+ - [solc-version](#solc-version) (2 results) (Informational)
+ - [low-level-calls](#low-level-calls) (2 results) (Informational)
+ - [cache-array-length](#cache-array-length) (3 results) (Optimization)
+ - [constable-states](#constable-states) (3 results) (Optimization)
+ - [immutable-states](#immutable-states) (1 results) (Optimization)
+## arbitrary-send-eth
+Impact: High
+Confidence: Medium
+ - [ ] ID-0
+[PuppyRaffle.withdrawFees()](src/PuppyRaffle.sol#L173-L179) sends eth to arbitrary user
+	Dangerous calls:
+	- [(success,None) = feeAddress.call{value: feesToWithdraw}()](src/PuppyRaffle.sol#L177)
+
+src/PuppyRaffle.sol#L173-L179
+
+
+## weak-prng
+Impact: High
+Confidence: Medium
+ - [ ] ID-1
+[PuppyRaffle.selectWinner()](src/PuppyRaffle.sol#L134-L168) uses a weak PRNG: "[winnerIndex = uint256(keccak256(bytes)(abi.encodePacked(msg.sender,block.timestamp,block.difficulty))) % players.length](src/PuppyRaffle.sol#L137-L139)" 
+
+src/PuppyRaffle.sol#L134-L168
+
+
+## incorrect-equality
+Impact: Medium
+Confidence: High
+ - [ ] ID-2
+[PuppyRaffle.withdrawFees()](src/PuppyRaffle.sol#L173-L179) uses a dangerous strict equality:
+	- [require(bool,string)(address(this).balance == uint256(totalFees),PuppyRaffle: There are currently players active!)](src/PuppyRaffle.sol#L174)
+
+src/PuppyRaffle.sol#L173-L179
+
+
+## reentrancy-no-eth
+Impact: Medium
+Confidence: Medium
+ - [ ] ID-3
+Reentrancy in [PuppyRaffle.refund(uint256)](src/PuppyRaffle.sol#L102-L111):
+	External calls:
+	- [address(msg.sender).sendValue(entranceFee)](src/PuppyRaffle.sol#L107)
+	State variables written after the call(s):
+	- [players[playerIndex] = address(0)](src/PuppyRaffle.sol#L109)
+	[PuppyRaffle.players](src/PuppyRaffle.sol#L27) can be used in cross function reentrancies:
+	- [PuppyRaffle.enterRaffle(address[])](src/PuppyRaffle.sol#L83-L98)
+	- [PuppyRaffle.getActivePlayerIndex(address)](src/PuppyRaffle.sol#L116-L126)
+	- [PuppyRaffle.players](src/PuppyRaffle.sol#L27)
+	- [PuppyRaffle.refund(uint256)](src/PuppyRaffle.sol#L102-L111)
+	- [PuppyRaffle.selectWinner()](src/PuppyRaffle.sol#L134-L168)
+
+src/PuppyRaffle.sol#L102-L111
+
+
+## missing-zero-check
+Impact: Low
+Confidence: Medium
+ - [ ] ID-4
+[PuppyRaffle.constructor(uint256,address,uint256)._feeAddress](src/PuppyRaffle.sol#L64) lacks a zero-check on :
+		- [feeAddress = _feeAddress](src/PuppyRaffle.sol#L66)
+
+src/PuppyRaffle.sol#L64
+
+
+ - [ ] ID-5
+[PuppyRaffle.changeFeeAddress(address).newFeeAddress](src/PuppyRaffle.sol#L185) lacks a zero-check on :
+		- [feeAddress = newFeeAddress](src/PuppyRaffle.sol#L186)
+
+src/PuppyRaffle.sol#L185
+
+
+## reentrancy-events
+Impact: Low
+Confidence: Medium
+ - [ ] ID-6
+Reentrancy in [PuppyRaffle.selectWinner()](src/PuppyRaffle.sol#L134-L168):
+	External calls:
+	- [(success,None) = winner.call{value: prizePool}()](src/PuppyRaffle.sol#L165)
+	- [_safeMint(winner,tokenId)](src/PuppyRaffle.sol#L167)
+		- [returndata = to.functionCall(abi.encodeWithSelector(IERC721Receiver(to).onERC721Received.selector,_msgSender(),from,tokenId,_data),ERC721: transfer to non ERC721Receiver implementer)](lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#L441-L447)
+		- [(success,returndata) = target.call{value: value}(data)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L119)
+	External calls sending eth:
+	- [(success,None) = winner.call{value: prizePool}()](src/PuppyRaffle.sol#L165)
+	- [_safeMint(winner,tokenId)](src/PuppyRaffle.sol#L167)
+		- [(success,returndata) = target.call{value: value}(data)](lib/openzeppelin-contracts/contracts/utils/Address.sol#L119)
+	Event emitted after the call(s):
+	- [Transfer(address(0),to,tokenId)](lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#L343)
+		- [_safeMint(winner,tokenId)](src/PuppyRaffle.sol#L167)
+
+src/PuppyRaffle.sol#L134-L168
+
+
+ - [ ] ID-7
+Reentrancy in [PuppyRaffle.refund(uint256)](src/PuppyRaffle.sol#L102-L111):
+	External calls:
+	- [address(msg.sender).sendValue(entranceFee)](src/PuppyRaffle.sol#L107)
+	Event emitted after the call(s):
+	- [RaffleRefunded(playerAddress)](src/PuppyRaffle.sol#L110)
+
+src/PuppyRaffle.sol#L102-L111
+
+
+## timestamp
+Impact: Low
+Confidence: Medium
+ - [ ] ID-8
+[PuppyRaffle.selectWinner()](src/PuppyRaffle.sol#L134-L168) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [require(bool,string)(block.timestamp >= raffleStartTime + raffleDuration,PuppyRaffle: Raffle not over)](src/PuppyRaffle.sol#L135)
+
+src/PuppyRaffle.sol#L134-L168
+
+
+## pragma
+Impact: Informational
+Confidence: High
+ - [ ] ID-9
+4 different versions of Solidity are used:
+	- Version constraint >=0.6.0 is used by:
+		-[>=0.6.0](lib/base64/base64.sol#L3)
+	- Version constraint >=0.6.0<0.8.0 is used by:
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/access/Ownable.sol#L3)
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/introspection/ERC165.sol#L3)
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/introspection/IERC165.sol#L3)
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/math/SafeMath.sol#L3)
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#L3)
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol#L3)
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/utils/Context.sol#L3)
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/utils/EnumerableMap.sol#L3)
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/utils/EnumerableSet.sol#L3)
+		-[>=0.6.0<0.8.0](lib/openzeppelin-contracts/contracts/utils/Strings.sol#L3)
+	- Version constraint >=0.6.2<0.8.0 is used by:
+		-[>=0.6.2<0.8.0](lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol#L3)
+		-[>=0.6.2<0.8.0](lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Enumerable.sol#L3)
+		-[>=0.6.2<0.8.0](lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Metadata.sol#L3)
+		-[>=0.6.2<0.8.0](lib/openzeppelin-contracts/contracts/utils/Address.sol#L3)
+	- Version constraint ^0.7.6 is used by:
+		-[^0.7.6](src/PuppyRaffle.sol#L3)
+
+lib/base64/base64.sol#L3
+
+
+## dead-code
+Impact: Informational
+Confidence: Medium
+ - [ ] ID-10
+[PuppyRaffle._isActivePlayer()](src/PuppyRaffle.sol#L191-L199) is never used and should be removed
+
+src/PuppyRaffle.sol#L191-L199
+
+
+## solc-version
+Impact: Informational
+Confidence: High
+ - [ ] ID-11
+Version constraint ^0.7.6 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess
+	- AbiReencodingHeadOverflowWithStaticArrayCleanup
+	- DirtyBytesArrayToStorage
+	- DataLocationChangeInInternalOverride
+	- NestedCalldataArrayAbiReencodingSizeValidation
+	- SignedImmutables
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching.
+It is used by:
+	- [^0.7.6](src/PuppyRaffle.sol#L3)
+
+src/PuppyRaffle.sol#L3
+
+
+ - [ ] ID-12
+solc-0.7.6 is an outdated solc version. Use a more recent version (at least 0.8.0), if possible.
+
+## low-level-calls
+Impact: Informational
+Confidence: High
+ - [ ] ID-13
+Low level call in [PuppyRaffle.selectWinner()](src/PuppyRaffle.sol#L134-L168):
+	- [(success,None) = winner.call{value: prizePool}()](src/PuppyRaffle.sol#L165)
+
+src/PuppyRaffle.sol#L134-L168
+
+
+ - [ ] ID-14
+Low level call in [PuppyRaffle.withdrawFees()](src/PuppyRaffle.sol#L173-L179):
+	- [(success,None) = feeAddress.call{value: feesToWithdraw}()](src/PuppyRaffle.sol#L177)
+
+src/PuppyRaffle.sol#L173-L179
+
+
+## cache-array-length
+Impact: Optimization
+Confidence: High
+ - [ ] ID-15
+Loop condition [i < players.length](src/PuppyRaffle.sol#L118) should use cached array length instead of referencing `length` member of the storage array.
+ 
+src/PuppyRaffle.sol#L118INFO:Slither:. analyzed (16 contracts with 99 detectors), 22 result(s) found
+
+
+
+ - [ ] ID-16
+Loop condition [i < players.length](src/PuppyRaffle.sol#L193) should use cached array length instead of referencing `length` member of the storage array.
+ 
+src/PuppyRaffle.sol#L193
+
+
+ - [ ] ID-17
+Loop condition [j < players.length](src/PuppyRaffle.sol#L93) should use cached array length instead of referencing `length` member of the storage array.
+ 
+src/PuppyRaffle.sol#L93
+
+
+## constable-states
+Impact: Optimization
+Confidence: High
+ - [ ] ID-18
+[PuppyRaffle.commonImageUri](src/PuppyRaffle.sol#L42) should be constant 
+
+src/PuppyRaffle.sol#L42
+
+
+ - [ ] ID-19
+[PuppyRaffle.legendaryImageUri](src/PuppyRaffle.sol#L52) should be constant 
+
+src/PuppyRaffle.sol#L52
+
+
+ - [ ] ID-20
+[PuppyRaffle.rareImageUri](src/PuppyRaffle.sol#L47) should be constant 
+
+src/PuppyRaffle.sol#L47
+
+
+## immutable-states
+Impact: Optimization
+Confidence: High
+ - [ ] ID-21
+[PuppyRaffle.raffleDuration](src/PuppyRaffle.sol#L28) should be immutable 
+
+src/PuppyRaffle.sol#L28
+
+
+make: *** [Makefile:30: slither] Error 255
